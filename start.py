@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 
 transform = transforms.Compose(
     [transforms.ToTensor(),
-     transforms.Normalize([0], [1])
+     transforms.Normalize([.5], [.5])
      ])
 data = datasets.MNIST(root='./dataset', train=True, transform=transform, download=True)
-data_loader = torch.utils.data.DataLoader(data, batch_size=32, shuffle=True)
+data_loader = torch.utils.data.DataLoader(data, batch_size=64, shuffle=True)
 num_batches = len(data_loader)
 
 
@@ -17,15 +17,15 @@ class Encoder(torch.nn.Module):
         super(Encoder, self).__init__()
 
         self.conv1 = torch.nn.Conv2d(in_channels=1, out_channels=1, kernel_size=2)
-        self.conv2 = torch.nn.Conv2d(in_channels=1, out_channels=1, kernel_size=2, stride=2)
-        self.lin1 = torch.nn.Linear(in_features=169, out_features=encoded_space_size)
+        self.conv2 = torch.nn.Conv2d(in_channels=1, out_channels=1, kernel_size=2)
+        self.lin2 = torch.nn.Linear(in_features=676, out_features=encoded_space_size)
 
     def forward(self, x):
         a = x.shape[0]
         x = torch.relu(self.conv1(x))
         x = torch.relu(self.conv2(x))
         x = x.reshape(a, 1, -1)
-        x = torch.sigmoid(self.lin1(x))
+        x = torch.sigmoid(self.lin2(x))
         return x
 
 
@@ -61,13 +61,13 @@ def vectors_to_images(vectors):
     return vectors.view(vectors.size(0), 1, 28, 28)
 
 
-num_epochs = 10000
+num_epochs = 1000
 
-encoded_space_size = 20
+encoded_space_size = 10
 
 autoencoder = AutoEncoder(encoded_space_size)
-loss = torch.nn.L1Loss()
-optimizer = torch.optim.Adam(autoencoder.parameters(), lr=1e-5)
+loss = torch.nn.MSELoss()
+optimizer = torch.optim.Adam(autoencoder.parameters(), lr=1e-4)
 
 
 for epoch in range(num_epochs):
