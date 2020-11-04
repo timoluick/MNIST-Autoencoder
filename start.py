@@ -83,7 +83,7 @@ for epoch in range(100):
         error.backward()
         optimizer.step()
         error_sum += error.detach().item()
-    print(error_sum / a)
+    print('Epoch: ' + str(epoch) + 'Mean Error: ' + str(error_sum / a))
     plt.imshow(
         to_img(
             autoencoder(
