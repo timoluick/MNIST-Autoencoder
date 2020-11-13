@@ -1,12 +1,13 @@
 from torchvision import datasets, transforms
 import torch
 import matplotlib.pyplot as plt
+from IPython import display
 
 
 transform = transforms.Compose(
     [
         transforms.ToTensor(),
-        transforms.Normalize([0], [1])
+        transforms.Normalize([.5], [.5])
     ]
 )
 
@@ -15,9 +16,8 @@ data = datasets.MNIST(root='./dataset',
                       download=True,
                       transform=transform)
 data_loader = torch.utils.data.DataLoader(data,
-                                          batch_size=32,
+                                          batch_size=64,
                                           shuffle=True)
-
 
 class Encoder(torch.nn.Module):
     def __init__(self, space_size):
@@ -45,7 +45,7 @@ class Decoder(torch.nn.Module):
     def forward(self, x):
         x = torch.relu(self.lin1(x))
         x = torch.relu(self.lin2(x))
-        x = torch.sigmoid(self.lin3(x))
+        x = torch.tanh(self.lin3(x))
         return x
 
 
@@ -71,7 +71,61 @@ def to_img(vec):
     return vec.reshape(vec.shape[0], 1, 28, 28)
 
 
-for epoch in range(100):
+def plot():
+    fig = plt.figure(1)
+    fig.clf()
+    axarr = fig.subplots(3, 3)
+    axarr[0, 0].imshow(to_img(
+            autoencoder(
+                data_loader.dataset[0][0].reshape(1, 1, 28, 28)
+            ).detach().numpy()
+        )[0, 0], cmap='gray')
+    axarr[0, 1].imshow(to_img(
+            autoencoder(
+                data_loader.dataset[1][0].reshape(1, 1, 28, 28)
+            ).detach().numpy()
+        )[0, 0], cmap='gray')
+    axarr[0, 2].imshow(to_img(
+            autoencoder(
+                data_loader.dataset[2][0].reshape(1, 1, 28, 28)
+            ).detach().numpy()
+        )[0, 0], cmap='gray')
+    axarr[1, 0].imshow(to_img(
+            autoencoder(
+                data_loader.dataset[3][0].reshape(1, 1, 28, 28)
+            ).detach().numpy()
+        )[0, 0], cmap='gray')
+    axarr[1, 1].imshow(to_img(
+            autoencoder(
+                data_loader.dataset[4][0].reshape(1, 1, 28, 28)
+            ).detach().numpy()
+        )[0, 0], cmap='gray')
+    axarr[1, 2].imshow(to_img(
+            autoencoder(
+                data_loader.dataset[5][0].reshape(1, 1, 28, 28)
+            ).detach().numpy()
+        )[0, 0], cmap='gray')
+    axarr[2, 0].imshow(to_img(
+            autoencoder(
+                data_loader.dataset[6][0].reshape(1, 1, 28, 28)
+            ).detach().numpy()
+        )[0, 0], cmap='gray')
+    axarr[2, 1].imshow(to_img(
+            autoencoder(
+                data_loader.dataset[7][0].reshape(1, 1, 28, 28)
+            ).detach().numpy()
+        )[0, 0], cmap='gray')
+    axarr[2, 2].imshow(to_img(
+            autoencoder(
+                data_loader.dataset[8][0].reshape(1, 1, 28, 28)
+            ).detach().numpy()
+        )[0, 0], cmap='gray')
+    plt.pause(0.0001)
+    display.clear_output(wait=True)
+    #display.display(fig.gcf())
+
+
+for epoch in range(1, 101):
     error_sum = 0
     a = 0
     for image_batch, _ in data_loader:
@@ -83,12 +137,5 @@ for epoch in range(100):
         error.backward()
         optimizer.step()
         error_sum += error.detach().item()
-    print('Epoch: ' + str(epoch) + 'Mean Error: ' + str(error_sum / a))
-    plt.imshow(
-        to_img(
-            autoencoder(
-                data_loader.dataset[0][0].reshape(1, 1, 28, 28)
-            ).detach().numpy()
-        )[0, 0], cmap='gray'
-    )
-    plt.show()
+    print('Epoch: ' + str(epoch) + ', Mean Error: ' + str(error_sum / a))
+    plot()
