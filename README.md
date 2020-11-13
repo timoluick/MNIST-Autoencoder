@@ -15,3 +15,7 @@ just type the following in your command line
 ````
 python start.py
 ````
+
+#### Trained Output
+
+![Trained Output](images/trained_output.png)
